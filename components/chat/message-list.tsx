@@ -36,11 +36,21 @@ export function MessageList({ messages, streamingMessage }: MessageListProps) {
   
   return (
     <div className="flex flex-col space-y-6 py-6">
-      {messages.map((message) => (
-        <MessageItem key={message.id} message={message} />
+      {messages.map((message, index) => (
+        <MessageItem 
+          key={message.id} 
+          message={message} 
+          isLastMessage={index === messages.length - 1}
+        />
       ))}
       
-      {streamingMessage && <MessageItem message={streamingMessage} isStreaming />}
+      {streamingMessage && (
+        <MessageItem 
+          message={streamingMessage} 
+          isStreaming={true}
+          isLastMessage={true}
+        />
+      )}
       
       {/* This div is used to auto-scroll to the bottom */}
       <div ref={bottomRef} />

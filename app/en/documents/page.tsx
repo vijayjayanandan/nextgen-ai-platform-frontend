@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { DocumentList } from "@/components/documents/document-list";
 import { DocumentUpload } from "@/components/documents/document-upload";
-import { documentsApi } from "@/lib/api/documents";
+import { documentsApiServer } from "@/lib/api/documents-server";
+import type { Document } from "@/types/document";
 import { getTranslations } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export default async function DocumentsPage({
   const t = await getTranslations(locale);
   
   // Check if the user is authenticated
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const accessToken = cookieStore.get("access_token");
   
   if (!accessToken) {
@@ -29,10 +30,10 @@ export default async function DocumentsPage({
   }
   
   // Fetch initial documents
-  let documents = [];
+  let documents: Document[] = [];
   
   try {
-    const response = await documentsApi.getDocuments({
+    const response = await documentsApiServer.getDocuments({
       sort_by: "created_at",
       sort_order: "desc",
     });

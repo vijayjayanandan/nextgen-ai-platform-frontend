@@ -1,15 +1,8 @@
-// next.config.js
+// next.config.js - Updated to fix experimental.serverActions error
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  poweredByHeader: false, // Security: Remove X-Powered-By header
-  
-  // i18n config is already handled in your middleware.ts file
-  // so we remove it from next.config.js
-  
-  experimental: {
-    turbo: false
-  },
+  poweredByHeader: false,
   
   async headers() {
     return [
@@ -19,7 +12,10 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' http://127.0.0.1:8000;"
+            // Add 'unsafe-eval' for development environment
+            value: process.env.NODE_ENV === 'development' 
+              ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' http://127.0.0.1:8000;"
+              : "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' http://127.0.0.1:8000;"
           },
           {
             key: 'X-XSS-Protection',
@@ -46,12 +42,8 @@ const nextConfig = {
     ]
   },
   experimental: {
-    serverActions: {
-      // Add your allowed origins for enhanced security
-      allowedOrigins: ['localhost:3000'],
-    },
-    // Add Turbopack configuration
-    turbo: {},
+    // Remove serverActions as it's now available by default
+    turbo: {}
   },
 };
 

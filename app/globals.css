@@ -1,14 +1,16 @@
+/* app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Inter var', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 /* Focus outline for keyboard navigation */
 *:focus-visible {
-  @apply outline-none ring-2 ring-primary-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-950 transition-shadow;
+  @apply outline-none ring-2 ring-primary-500 ring-offset-2 ring-offset-white dark:ring-offset-neutral-950 transition-shadow;
 }
 
 /* Accessible animations and transitions */
@@ -32,11 +34,11 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-700 rounded-full border-4 border-solid border-transparent bg-clip-padding;
+  @apply bg-neutral-300 dark:bg-neutral-700 rounded-full border-4 border-solid border-transparent bg-clip-padding;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-600;
+  @apply bg-neutral-400 dark:bg-neutral-600;
 }
 
 /* Typography adjustments */
@@ -46,25 +48,25 @@
 
 /* Data loading states */
 .loading-skeleton {
-  @apply bg-gray-200 dark:bg-gray-800 animate-pulse rounded;
+  @apply bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded;
 }
 
 /* Code block styling */
 .prose pre {
-  @apply rounded-md bg-gray-900 dark:bg-gray-950 text-gray-50 font-mono text-sm leading-relaxed;
+  @apply rounded-md bg-neutral-900 dark:bg-neutral-950 text-neutral-50 font-mono text-sm leading-relaxed;
 }
 
 .prose code {
-  @apply rounded bg-gray-100 dark:bg-gray-800 px-1 py-0.5 font-mono text-sm text-gray-800 dark:text-gray-200;
+  @apply rounded bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 font-mono text-sm text-neutral-800 dark:text-neutral-200;
 }
 
 /* Improve contrast ratios for accessibility */
-.text-gray-500 {
-  @apply dark:text-gray-400;
+.text-neutral-500 {
+  @apply dark:text-neutral-400;
 }
 
-.text-gray-600 {
-  @apply dark:text-gray-300;
+.text-neutral-600 {
+  @apply dark:text-neutral-300;
 }
 
 /* Chat message styling */
@@ -77,7 +79,7 @@
 }
 
 .message-bubble.assistant {
-  @apply bg-white dark:bg-gray-900 mr-auto;
+  @apply bg-white dark:bg-neutral-900 mr-auto;
 }
 
 /* Streaming typing animation */
@@ -111,4 +113,130 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+/* Additional enterprise-grade UI enhancements */
+@layer components {
+  .card {
+    @apply bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+
+  .button-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 transition-all;
+  }
+
+  .button-secondary {
+    @apply bg-white hover:bg-neutral-50 text-neutral-800 font-medium py-2 px-4 rounded border border-neutral-300 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-opacity-50 transition-all;
+  }
+
+  .button-accent {
+    @apply bg-accent-500 hover:bg-accent-600 text-white font-medium py-2 px-4 rounded shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-opacity-50 transition-all;
+  }
+
+  .input-field {
+    @apply w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm placeholder-neutral-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500;
+  }
+
+  .dropdown {
+    @apply relative inline-block text-left;
+  }
+
+  .dropdown-menu {
+    @apply absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white dark:bg-neutral-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none divide-y divide-neutral-100 dark:divide-neutral-700;
+  }
+
+  .dropdown-item {
+    @apply block px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .badge-blue {
+    @apply bg-info-100 text-info-800 dark:bg-info-900 dark:text-info-300;
+  }
+
+  .badge-green {
+    @apply bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-300;
+  }
+
+  .badge-red {
+    @apply bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-300;
+  }
+
+  .badge-yellow {
+    @apply bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-300;
+  }
+
+  .toast {
+    @apply fixed bottom-4 right-4 z-50 max-w-md rounded-lg p-4 shadow-lg;
+  }
+
+  .toast-success {
+    @apply bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-300 border border-success-200 dark:border-success-800;
+  }
+
+  .toast-error {
+    @apply bg-accent-100 text-accent-800 dark:bg-accent-900 dark:text-accent-300 border border-accent-200 dark:border-accent-800;
+  }
+
+  .toast-warning {
+    @apply bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-300 border border-warning-200 dark:border-warning-800;
+  }
+
+  .toast-info {
+    @apply bg-info-100 text-info-800 dark:bg-info-900 dark:text-info-300 border border-info-200 dark:border-info-800;
+  }
+
+  /* Data table styling */
+  .table-container {
+    @apply overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-700;
+  }
+
+  .data-table {
+    @apply min-w-full divide-y divide-neutral-200 dark:divide-neutral-700;
+  }
+
+  .data-table thead {
+    @apply bg-neutral-50 dark:bg-neutral-800;
+  }
+
+  .data-table th {
+    @apply px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider;
+  }
+
+  .data-table tbody {
+    @apply bg-white dark:bg-neutral-900 divide-y divide-neutral-200 dark:divide-neutral-700;
+  }
+
+  .data-table td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400;
+  }
+
+  /* Form elements */
+  .form-group {
+    @apply mb-4;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1;
+  }
+
+  .form-hint {
+    @apply mt-1 text-xs text-neutral-500 dark:text-neutral-400;
+  }
+
+  .form-error {
+    @apply mt-1 text-xs text-accent-500 dark:text-accent-400;
+  }
+
+  /* Progress indicators */
+  .progress-bar {
+    @apply w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2.5 overflow-hidden;
+  }
+
+  .progress-bar-fill {
+    @apply bg-primary-500 h-2.5 rounded-full;
+  }
 }

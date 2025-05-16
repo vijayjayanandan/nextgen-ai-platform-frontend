@@ -1,5 +1,5 @@
 // lib/api/documents.ts
-import { apiClient } from './base';
+import { apiClient, ApiClient } from './base';
 import type { 
   Document, 
   DocumentSearchParams, 
@@ -13,6 +13,11 @@ const DOCUMENTS_ENDPOINT = '/documents';
  * Documents API client for managing documents
  */
 export class DocumentsApi {
+  private client: ApiClient;
+
+  constructor() {
+    this.client = apiClient;
+  }
   /**
    * Get all documents with optional filtering and pagination
    */
@@ -22,12 +27,17 @@ export class DocumentsApi {
       const searchParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) {
-          searchParams.append(key, String(value));
+          // Handle enum values properly
+          if (key === 'status' && typeof value === 'string') {
+            searchParams.append(key, value.toLowerCase());
+          } else {
+            searchParams.append(key, String(value));
+          }
         }
       });
       
       const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
-      return await apiClient.get<DocumentsResponse>(`${DOCUMENTS_ENDPOINT}${query}`);
+      return await this.client.get<DocumentsResponse>(`${DOCUMENTS_ENDPOINT}${query}`);
     } catch (error) {
       console.error('Failed to fetch documents:', error);
       throw new Error(
@@ -41,7 +51,7 @@ export class DocumentsApi {
    */
   async getDocument(id: string): Promise<Document> {
     try {
-      return await apiClient.get<Document>(`${DOCUMENTS_ENDPOINT}/${id}`);
+      return await this.client.get<Document>(`${DOCUMENTS_ENDPOINT}/${id}`);
     } catch (error) {
       console.error(`Failed to fetch document ${id}:`, error);
       throw new Error(
@@ -64,7 +74,7 @@ export class DocumentsApi {
       // Add metadata as JSON string
       formData.append('metadata', JSON.stringify(metadata));
       
-      return await apiClient.upload<DocumentUploadResponse>(DOCUMENTS_ENDPOINT, formData);
+      return await this.client.upload<DocumentUploadResponse>(DOCUMENTS_ENDPOINT, formData);
     } catch (error) {
       console.error('Failed to upload document:', error);
       throw new Error(
@@ -81,7 +91,7 @@ export class DocumentsApi {
     updates: { title?: string; security_classification?: string; tags?: string[] }
   ): Promise<Document> {
     try {
-      return await apiClient.put<Document>(`${DOCUMENTS_ENDPOINT}/${id}`, updates);
+      return await this.client.put<Document>(`${DOCUMENTS_ENDPOINT}/${id}`, updates);
     } catch (error) {
       console.error(`Failed to update document ${id}:`, error);
       throw new Error(
@@ -95,7 +105,7 @@ export class DocumentsApi {
    */
   async deleteDocument(id: string): Promise<void> {
     try {
-      await apiClient.delete<void>(`${DOCUMENTS_ENDPOINT}/${id}`);
+      await this.client.delete<void>(`${DOCUMENTS_ENDPOINT}/${id}`);
     } catch (error) {
       console.error(`Failed to delete document ${id}:`, error);
       throw new Error(
@@ -109,7 +119,7 @@ export class DocumentsApi {
    */
   async getDocumentContent(id: string): Promise<string> {
     try {
-      return await apiClient.get<string>(`${DOCUMENTS_ENDPOINT}/${id}/content`);
+      return await this.client.get<string>(`${DOCUMENTS_ENDPOINT}/${id}/content`);
     } catch (error) {
       console.error(`Failed to fetch document content for ${id}:`, error);
       throw new Error(

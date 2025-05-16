@@ -6,7 +6,7 @@ import { setCookie, getCookie, deleteCookie } from '@/lib/utils/cookies';
 import type { AuthResponse, Credentials, RefreshTokenResponse, User } from '@/types/auth';
 
 const AUTH_ENDPOINTS = {
-  LOGIN: '/auth/login',
+  LOGIN: '/token',
   REFRESH: '/auth/refresh',
   LOGOUT: '/auth/logout',
   ME: '/auth/me',
@@ -21,9 +21,29 @@ export class AuthApi {
    */
   async login(credentials: Credentials): Promise<AuthResponse> {
     try {
-      const response = await apiClient.post<AuthResponse>(
+      // Validate credentials
+      const username = credentials.username || credentials.email;
+      if (!username) {
+        throw new Error('Username or email is required');
+      }
+      if (!credentials.password) {
+        throw new Error('Password is required');
+      }
+
+      // Format the data as x-www-form-urlencoded for OAuth2PasswordRequestForm
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', credentials.password);
+
+      const response = await apiClient.fetch<AuthResponse>(
         AUTH_ENDPOINTS.LOGIN, 
-        credentials
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: formData.toString()
+        }
       );
       
       // Set cookies to store authentication tokens
@@ -121,6 +141,7 @@ export const authApi = new AuthApi();
  */
 export async function loginAction(credentials: Credentials): Promise<{ success: boolean; error?: string }> {
   try {
+    // Explicitly use username and password as expected by backend
     await authApi.login(credentials);
     return { success: true };
   } catch (error) {

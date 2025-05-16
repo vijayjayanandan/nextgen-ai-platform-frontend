@@ -1,79 +1,24 @@
-// app/[locale]/chat/page.tsx
+// app/en/chat/page.tsx
 import { Metadata } from "next";
 import { cookies } from "next/headers";
-import { chatApi } from "@/lib/api/chat";
-import { documentsApi } from "@/lib/api/documents";
-import { ChatWindow } from "@/components/chat/chat-window";
-import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
-import { getTranslations } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
+import ChatPageClient from "@/components/chat/chat-page";
 
 export const metadata: Metadata = {
   title: "Chat",
   description: "Chat with the AI assistant",
 };
 
-export default async function ChatPage({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  const t = await getTranslations(locale);
-  
+export default async function ChatPage() {
   // Check if the user is authenticated
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const accessToken = cookieStore.get("access_token");
   
   if (!accessToken) {
-    // Redirect to login page if not authenticated
-    redirect(`/${locale}/auth/login?callbackUrl=/${locale}/chat`);
+    redirect(`/en/auth/login`);
   }
-  
-  // Fetch conversations for the sidebar
-  let conversations = [];
-  let documents = [];
-  
-  try {
-    const [conversationsData, documentsData] = await Promise.all([
-      chatApi.getConversations(),
-      documentsApi.getDocuments({ status: "ready", limit: 20 }),
-    ]);
-    
-    conversations = conversationsData;
-    documents = documentsData.documents;
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    // Continue with empty data
-  }
-  
-  return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
-      {/* Sidebar */}
-      <div className="hidden md:block w-80 h-full flex-shrink-0">
-        <ConversationSidebar
-          initialConversations={conversations}
-        />
-      </div>
-      
-      {/* Main chat area */}
-      <div className="flex-1 flex flex-col h-full">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 md:hidden">
-          <h1 className="text-xl font-bold">{t("chat.newChat")}</h1>
-          <button
-            type="button"
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-            aria-label={t("chat.toggleSidebar")}
-          >
-            <MenuIcon className="h-6 w-6" />
-          </button>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto">
-          <ChatWindow documents={documents} />
-        </div>
-      </div>
-    </div>
-  );
+
+  return <ChatPageClient />;
 }
 
 // Icon

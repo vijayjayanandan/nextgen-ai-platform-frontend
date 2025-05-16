@@ -19,7 +19,7 @@ export default async function SettingsPage({
   const t = await getTranslations(locale);
   
   // Check if the user is authenticated
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const accessToken = cookieStore.get("access_token");
   
   if (!accessToken) {

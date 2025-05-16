@@ -1,0 +1,16 @@
+{
+  "login": {
+    "usernameLabel": "Username or Email",
+    "usernamePlaceholder": "Enter your username or email",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "forgotPassword": "Forgot Password?",
+    "genericError": "An error occurred during login"
+  },
+  "chat": {
+    "toggleSidebar": "Toggle Sidebar",
+    "conversationHistory": "Conversation History",
+    "noConversations": "No conversations yet"
+  }
+}

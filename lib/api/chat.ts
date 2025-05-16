@@ -1,5 +1,7 @@
 // lib/api/chat.ts
-import { apiClient } from './base';
+import { ApiClientClient } from './base-client';
+
+const apiClient = new ApiClientClient();
 import type { 
   ChatCompletionRequest, 
   ChatCompletionResponse,
@@ -10,13 +12,16 @@ import type {
 const CHAT_ENDPOINTS = {
   COMPLETIONS: '/chat/completions',
   STREAM: '/chat/stream',
-  CONVERSATIONS: '/conversations',
+  CONVERSATIONS: '/chat/conversations',
+  MESSAGES: '/chat/messages',
 };
 
 /**
  * Chat API client for interacting with chat endpoints
  */
 export class ChatApi {
+  private client = apiClient;
+
   /**
    * Send a non-streaming chat completion request
    */
@@ -41,10 +46,10 @@ export class ChatApi {
    * Returns the raw Response object for streaming
    */
   async createStreamingChatCompletion(
-    request: ChatCompletionRequest
+    content: string,
+    selectedDocumentIds: string[] = []
   ): Promise<Response> {
     try {
-      // For client-side usage, we need to get the token from cookies
       let token = '';
       
       // Check if we're in a browser environment
@@ -64,7 +69,16 @@ export class ChatApi {
           'Accept': 'text/event-stream',
           ...(token && { 'Authorization': `Bearer ${token}` }),
         },
-        body: JSON.stringify({ ...request, stream: true }),
+        body: JSON.stringify({
+          model: "claude-3-7-sonnet-20250219",
+          messages: [
+            { role: "user", content }
+          ],
+          stream: true,
+          max_tokens: 1000, // Limit response length
+          temperature: 0.7, // Balance between deterministic and creative responses
+          document_ids: selectedDocumentIds
+        }),
         credentials: 'include', // Include cookies in the request
       });
       

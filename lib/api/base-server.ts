@@ -1,14 +1,13 @@
-// lib/api/base.ts
-"use client";
+// lib/api/base-server.ts
 
-import { getCookie } from '@/lib/utils/cookies-client';
+import { getCookie } from '@/lib/utils/cookies-server';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 /**
- * Base API client for making authenticated requests to the backend
+ * Base API client for making authenticated requests to the backend in server components
  */
-export class ApiClient {
+export class ApiClientServer {
   private baseUrl: string;
   
   constructor(baseUrl: string = API_BASE_URL) {
@@ -25,25 +24,25 @@ export class ApiClient {
     const url = `${this.baseUrl}${endpoint}`;
     const token = getCookie('access_token');
     
-    // Initialize headers
+    // Create headers
     const headers = new Headers();
+    
+    // Set authorization header if token exists
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
     
     // Copy existing headers if any
     if (options.headers) {
       if (Array.isArray(options.headers)) {
         options.headers.forEach(([key, value]) => {
-          headers.append(key, String(value));
+          headers.append(key, value as string);
         });
       } else if (typeof options.headers === 'object') {
         Object.entries(options.headers).forEach(([key, value]) => {
-          headers.append(key, String(value));
+          headers.append(key, value as string);
         });
       }
-    }
-    
-    // Set authorization header if token exists
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
     }
     
     const response = await fetch(url, {
@@ -54,57 +53,23 @@ export class ApiClient {
     
     // Handle HTTP errors
     if (!response.ok) {
-      console.error('API Request Details:', {
-        url: `${this.baseUrl}${endpoint}`,
-        method: options.method,
-        headers: headers,
-        body: options.body,
-        status: response.status,
-        statusText: response.statusText
-      });
-
       const errorText = await response.text();
       let errorData;
       
       try {
         errorData = JSON.parse(errorText);
-        console.error('API Error Response:', {
-          statusCode: response.status,
-          statusText: response.statusText,
-          error: errorData,
-          rawResponse: errorText
-        });
-      } catch (e) {
-        console.error('API Error Response (non-JSON):', {
-          statusCode: response.status,
-          statusText: response.statusText,
-          rawResponse: errorText
-        });
+      } catch {
+        errorData = { error: errorText };
       }
-
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-
-    // Log successful responses for debugging
-    console.log('API Response:', {
-      url: `${this.baseUrl}${endpoint}`,
-      status: response.status,
-      statusText: response.statusText
-    });
-
-    // Return raw response for streaming
-    if (options.headers && typeof options.headers === 'object' && 'get' in options.headers) {
-      const headers = options.headers as Headers;
-      if (headers.get('Accept') === 'text/event-stream') {
-        return response as unknown as T;
-      }
+      
+      throw new Error(errorData.error || `API Error: ${response.status} ${response.statusText}`);
     }
     
     // Parse response based on content type
     const contentType = response.headers.get('Content-Type');
     
     if (contentType?.includes('application/json')) {
-      return response.json() as T;
+      return response.json();
     }
     
     if (contentType?.includes('text/event-stream')) {
@@ -135,7 +100,7 @@ export class ApiClient {
   async delete<T>(endpoint: string): Promise<T> {
     return this.fetch<T>(endpoint, { method: 'DELETE' });
   }
-  
+
   async upload<T>(endpoint: string, formData: FormData, options: RequestInit = {}): Promise<T> {
     const token = getCookie('access_token');
     
@@ -162,33 +127,10 @@ export class ApiClient {
       headers.set('Authorization', `Bearer ${token}`);
     }
     
-    // Don't set Content-Type header as it's automatically set with the correct boundary
-    
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...options,
+    return this.fetch<T>(endpoint, {
       method: 'POST',
-      headers,
       body: formData,
+      headers,
     });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorData;
-      
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (e) {
-        errorData = { detail: errorText };
-      }
-      
-      throw new Error(
-        errorData.detail || `API Error: ${response.status} ${response.statusText}`
-      );
-    }
-    
-    return await response.json() as T;
   }
 }
-
-// Create and export a singleton instance
-export const apiClient = new ApiClient();

@@ -2,8 +2,9 @@
 import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { chatApi } from "@/lib/api/chat";
-import { documentsApi } from "@/lib/api/documents";
+import { chatApiServer } from "@/lib/api/chat-server";
+import { documentsApiServer } from "@/lib/api/documents-server";
+import { DocumentStatus } from "@/types/document";
 import { ChatWindow } from "@/components/chat/chat-window";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { getTranslations } from "@/lib/i18n/server";
@@ -14,7 +15,7 @@ export async function generateMetadata({
   params: { id: string };
 }): Promise<Metadata> {
   try {
-    const conversation = await chatApi.getConversation(id);
+    const conversation = await chatApiServer.getConversation(id);
     return {
       title: `${conversation.title.slice(0, 50)} | Chat`,
       description: "Chat conversation",
@@ -35,7 +36,7 @@ export default async function ChatConversationPage({
   const t = await getTranslations(locale);
   
   // Check if the user is authenticated
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const accessToken = cookieStore.get("access_token");
   
   if (!accessToken) {
@@ -50,9 +51,9 @@ export default async function ChatConversationPage({
   
   try {
     const [conversationData, conversationsData, documentsData] = await Promise.all([
-      chatApi.getConversation(id),
-      chatApi.getConversations(),
-      documentsApi.getDocuments({ status: "ready", limit: 20 }),
+      chatApiServer.getConversation(id),
+      chatApiServer.getConversations(),
+      documentsApiServer.getDocuments({ status: DocumentStatus.READY, limit: 20 }),
     ]);
     
     conversation = conversationData;

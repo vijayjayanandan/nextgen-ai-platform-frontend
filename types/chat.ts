@@ -1,10 +1,13 @@
 // types/chat.ts
+import type { Document } from './document';
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   created_at: string;
   documents?: Document[];
+  isStreaming?: boolean;
 }
 
 export interface Conversation {

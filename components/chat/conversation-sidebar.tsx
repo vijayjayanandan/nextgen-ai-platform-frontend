@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Conversation } from "@/types/chat";
 import { chatApi } from "@/lib/api/chat";
 import { useTranslation } from "@/lib/i18n/client";
-import { formatDate } from "@/lib/utils";
 
 interface ConversationSidebarProps {
   initialConversations: Conversation[];
@@ -118,11 +117,13 @@ export function ConversationSidebar({
   };
   
   // Filter conversations based on search query
-  const filteredConversations = searchQuery
-    ? conversations.filter((c) =>
-        c.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : conversations;
+  const filteredConversations = Array.isArray(conversations) 
+    ? (searchQuery
+        ? conversations.filter((c) =>
+            c.title.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : conversations)
+    : [];
   
   return (
     <div className="flex h-full flex-col bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 w-full">
@@ -160,7 +161,7 @@ export function ConversationSidebar({
           <div className="p-4 text-center text-accent-500">
             {error}
             <Button
-              variant="link"
+              variant="outline"
               onClick={fetchConversations}
               className="mt-2 text-accent-600 dark:text-accent-400"
             >
@@ -222,10 +223,7 @@ export function ConversationSidebar({
                         {conversation.title}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {formatDate(conversation.updated_at, {
-                          month: "short",
-                          day: "numeric",
-                        })}
+                        {new Date(conversation.updated_at).toLocaleDateString()}
                       </div>
                     </div>
                     

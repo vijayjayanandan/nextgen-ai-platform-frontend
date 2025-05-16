@@ -4,9 +4,8 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { documentsApi } from "@/lib/api/documents";
+import { documentsApiServer } from "@/lib/api/documents-server";
 import { getTranslations } from "@/lib/i18n/server";
-import { formatDate, formatFileSize } from "@/lib/utils";
 import { DocumentStatus } from "@/types/document";
 
 export async function generateMetadata({
@@ -15,7 +14,7 @@ export async function generateMetadata({
   params: { id: string };
 }): Promise<Metadata> {
   try {
-    const document = await documentsApi.getDocument(id);
+    const document = await documentsApiServer.getDocument(id);
     return {
       title: `${document.title || document.filename} | Documents`,
       description: `Document details for ${document.title || document.filename}`,
@@ -36,7 +35,7 @@ export default async function DocumentDetailPage({
   const t = await getTranslations(locale);
   
   // Check if the user is authenticated
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const accessToken = cookieStore.get("access_token");
   
   if (!accessToken) {
@@ -49,12 +48,12 @@ export default async function DocumentDetailPage({
   let documentContent = null;
   
   try {
-    document = await documentsApi.getDocument(id);
+    document = await documentsApiServer.getDocument(id);
     
     // Only try to get content if document is ready
     if (document.status === DocumentStatus.READY) {
       try {
-        documentContent = await documentsApi.getDocumentContent(id);
+        documentContent = await documentsApiServer.getDocumentContent(id);
       } catch (contentError) {
         console.error("Error fetching document content:", contentError);
         // Continue without content
@@ -197,7 +196,7 @@ export default async function DocumentDetailPage({
                   {t("documents.size")}
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                  {formatFileSize(document.size)}
+                  {(document.size / 1024).toFixed(2)} KB
                 </dd>
               </div>
               
@@ -206,13 +205,7 @@ export default async function DocumentDetailPage({
                   {t("documents.uploadDate")}
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                  {formatDate(document.created_at, {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {new Date(document.created_at).toLocaleString()}
                 </dd>
               </div>
               

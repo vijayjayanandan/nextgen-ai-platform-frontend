@@ -13,8 +13,8 @@ import { useTranslation } from "@/lib/i18n/client";
 
 // Form validation schema
 const loginSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
+  username: z.string().min(1, {
+    message: "Please enter your username or email.",
   }),
   password: z.string().min(8, {
     message: "Password must be at least 8 characters.",
@@ -39,7 +39,7 @@ export function LoginForm() {
   } = useForm<LoginFormValues>({
     // Using basic validation without zodResolver
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
   });
@@ -49,6 +49,16 @@ export function LoginForm() {
     setError(null);
     
     try {
+      // Ensure we have both username and password
+      if (!data.username) {
+        setError(t("login.usernameRequired"));
+        return;
+      }
+      if (!data.password) {
+        setError(t("login.passwordRequired"));
+        return;
+      }
+
       const result = await loginAction(data);
       
       if (result.success) {
@@ -59,7 +69,11 @@ export function LoginForm() {
         setError(result.error || t("login.genericError"));
       }
     } catch (err) {
-      setError(t("login.genericError"));
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(t("login.genericError"));
+      }
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -77,18 +91,18 @@ export function LoginForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
           <label
-            htmlFor="email"
+            htmlFor="username"
             className="text-sm font-medium text-gray-700 dark:text-gray-300"
           >
-            {t("login.emailLabel")}
+            {t("login.usernameLabel")}
           </label>
           <Input
-            id="email"
-            type="email"
-            placeholder={t("login.emailPlaceholder")}
-            autoComplete="email"
-            error={errors.email?.message}
-            {...register("email")}
+            id="username"
+            type="text"
+            placeholder={t("login.usernamePlaceholder")}
+            autoComplete="username"
+            error={errors.username?.message}
+            {...register("username")}
           />
         </div>
         

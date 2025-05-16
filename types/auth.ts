@@ -1,6 +1,13 @@
 // types/auth.ts
 export interface Credentials {
-  email: string;
+  email?: string;
+  username: string;
+  password: string;
+}
+
+// Type for backend credentials
+export type BackendCredentials = {
+  username: string;
   password: string;
 }
 
