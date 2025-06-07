@@ -139,10 +139,9 @@ export class ApiClient {
   async upload<T>(endpoint: string, formData: FormData, options: RequestInit = {}): Promise<T> {
     const token = getCookie('access_token');
     
-    // Create headers
-    const headers = new Headers({
-      'Content-Type': 'multipart/form-data'
-    });
+    // Create headers without explicitly setting Content-Type so that the
+    // browser can automatically add the correct multipart boundary
+    const headers = new Headers();
     
     // Add any additional headers
     if (options.headers) {
